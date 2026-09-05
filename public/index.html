@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SD Photo Viewer</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="sticky-header">
+    <header class="topbar">
+      <h1>SD Photo Viewer</h1>
+      <div class="loadbar">
+        <input id="dirInput" type="text" placeholder="/Volumes/YOUR_SD_CARD" />
+        <button id="loadBtn">Load</button>
+        <div id="volumeSuggestions" class="suggestions"></div>
+      </div>
+    </header>
+
+    <div id="toolbar" class="toolbar hidden">
+      <span id="countLabel"></span>
+      <button id="selectAllBtn">Select all</button>
+      <button id="clearSelBtn">Clear selection</button>
+      <button id="compareBtn" disabled>Compare selected</button>
+      <button id="deleteSelBtn" class="danger" disabled>Move selected to Trash</button>
+    </div>
+
+    <div id="compareHeader" class="compare-header hidden">
+      <button id="backToGridBtn">&larr; Back to grid</button>
+    </div>
+  </div>
+
+  <main id="gridView" class="grid"></main>
+
+  <div id="compareView" class="compare hidden">
+    <div id="compareRow" class="compare-row"></div>
+  </div>
+
+  <div id="editOverlay" class="edit-overlay hidden">
+    <div class="edit-panel">
+      <div class="edit-topbar">
+        <span id="editFilename" class="edit-filename"></span>
+        <button id="editCloseBtn">✕ Close</button>
+      </div>
+      <div class="edit-toolbar">
+        <button id="rotateLeftBtn" title="Rotate left">⟲ Rotate</button>
+        <button id="rotateRightBtn" title="Rotate right">⟳ Rotate</button>
+        <button id="cropToggleBtn">Crop</button>
+        <select id="cropRatioSelect" title="Crop aspect ratio">
+          <option value="free">Free</option>
+          <option value="original">Original ratio</option>
+          <option value="1:1">Square 1:1</option>
+          <option value="4:3">4:3</option>
+          <option value="3:2">3:2</option>
+          <option value="16:9">16:9</option>
+          <option value="custom">Custom...</option>
+        </select>
+        <span id="customRatioInputs" class="custom-ratio hidden">
+          <input id="customRatioW" type="number" min="1" value="1" />
+          <span>:</span>
+          <input id="customRatioH" type="number" min="1" value="1" />
+        </span>
+        <button id="cropApplyBtn" disabled>Apply Crop</button>
+        <label class="slider-label">Brightness
+          <input id="brightnessSlider" type="range" min="50" max="150" value="100" />
+        </label>
+        <label class="slider-label">Contrast
+          <input id="contrastSlider" type="range" min="50" max="150" value="100" />
+        </label>
+        <button id="resetEditBtn">Reset</button>
+      </div>
+      <div class="edit-canvas-outer">
+        <div class="edit-canvas-wrap">
+          <canvas id="editCanvas"></canvas>
+          <div id="cropBox" class="crop-box hidden"></div>
+        </div>
+      </div>
+      <div class="edit-footer">
+        <span class="edit-hint">Save as a new copy (original stays untouched), or overwrite the original file.</span>
+        <div class="edit-footer-buttons">
+          <button id="saveCopyBtn" class="primary">Save as Copy</button>
+          <button id="saveOverwriteBtn" class="danger">Overwrite Original</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
