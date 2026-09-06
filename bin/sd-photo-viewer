@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -e
+exec node "$HOME/.tlib/repos/knittingCat/SD-Photo-Viewer/server.js" "$@"

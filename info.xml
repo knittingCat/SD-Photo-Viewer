@@ -6,7 +6,7 @@
       <tool name="npm"/>
     </requires>
     <commands>
-      <command name="sd-photo-viewer" build="npm install" output="server.js"/>
+      <command name="sd-photo-viewer" build="npm install" output="bin/sd-photo-viewer"/>
     </commands>
   </package>
 </tlib>
