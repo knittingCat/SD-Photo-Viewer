@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import express from 'express';
 import trash from 'trash';
 import sharp from 'sharp';
