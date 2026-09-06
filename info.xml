@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tlib version="1">
+  <package name="sd-photo-viewer" version="1.0.0">
+    <requires>
+      <tool name="node"/>
+      <tool name="npm"/>
+    </requires>
+    <commands>
+      <command name="sd-photo-viewer" language="node" source="server.js" build="npm install"/>
+    </commands>
+  </package>
+</tlib>
