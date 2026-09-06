@@ -1,3 +1,9 @@
 #!/usr/bin/env bash
 set -e
-exec node "$HOME/.tlib/repos/knittingCat/SD-Photo-Viewer/server.js" "$@"
+REPO_DIR="$HOME/.tlib/repos/knittingCat/SD-Photo-Viewer"
+TARGET=$(find "$REPO_DIR" -maxdepth 2 -name server.js 2>/dev/null | head -1)
+if [ -z "$TARGET" ]; then
+  echo "sd-photo-viewer: could not find server.js under $REPO_DIR" >&2
+  exit 1
+fi
+exec node "$TARGET" "$@"
