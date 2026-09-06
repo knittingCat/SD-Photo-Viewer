@@ -22,12 +22,24 @@ A local web app for browsing, culling, and lightly editing photos straight off a
 
 ## Setup
 
+### Option 1: manual
+
+Run this from inside the cloned repo (not your home directory — `npm start` needs the `package.json` here):
+
 ```bash
 npm install
 npm start
 ```
 
-Then open [http://localhost:4173](http://localhost:4173) and load a folder (e.g. your SD card's mount point, or paste its path directly).
+### Option 2: via tlib
+
+If you installed this with `tlib`, it's already set up — just run:
+
+```bash
+sd-photo-viewer
+```
+
+Either way, then open [http://localhost:4173](http://localhost:4173) and load a folder (e.g. your SD card's mount point, or paste its path directly).
 
 ## Safety
 
