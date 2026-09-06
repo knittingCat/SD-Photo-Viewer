@@ -159,6 +159,16 @@ function makeTile(photo) {
     tile.appendChild(edit);
   }
 
+  const rename = document.createElement('button');
+  rename.className = 'tile-rename';
+  rename.textContent = 'Aa';
+  rename.title = 'Rename';
+  rename.addEventListener('click', (e) => {
+    e.stopPropagation();
+    renamePhoto(photo);
+  });
+  tile.appendChild(rename);
+
   tile.addEventListener('click', () => toggleSelect(photo.path, tile));
 
   return tile;
@@ -197,6 +207,40 @@ async function deletePhotos(paths) {
     renderGrid();
     renderCompare();
     showToast(`Moved ${label} to Trash`);
+  } catch (err) {
+    showToast('Error contacting server: ' + err);
+  }
+}
+
+async function renamePhoto(photo) {
+  const dot = photo.name.lastIndexOf('.');
+  const baseName = dot > 0 ? photo.name.slice(0, dot) : photo.name;
+  const input = prompt('Rename photo (extension is kept automatically):', baseName);
+  if (input === null) return;
+  const newBase = input.trim();
+  if (!newBase || newBase === baseName) return;
+
+  try {
+    const res = await fetch('/api/rename', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: photo.path, newName: newBase })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data.error || 'Rename failed');
+      return;
+    }
+    const oldPath = photo.path;
+    photo.path = data.path;
+    photo.name = data.name;
+    if (selected.has(oldPath)) {
+      selected.delete(oldPath);
+      selected.add(data.path);
+    }
+    renderGrid();
+    renderCompare();
+    showToast(`Renamed to ${data.name}`);
   } catch (err) {
     showToast('Error contacting server: ' + err);
   }
@@ -253,6 +297,11 @@ function renderCompare() {
       edit.addEventListener('click', () => openEditor(photo));
       buttonGroup.appendChild(edit);
     }
+
+    const rename = document.createElement('button');
+    rename.textContent = 'Rename';
+    rename.addEventListener('click', () => renamePhoto(photo));
+    buttonGroup.appendChild(rename);
 
     const del = document.createElement('button');
     del.className = 'danger';

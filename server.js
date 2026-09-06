@@ -232,6 +232,63 @@ app.post('/api/trash', async (req, res) => {
   }
 });
 
+app.post('/api/rename', async (req, res) => {
+  const { path: p, newName } = req.body || {};
+  if (!p || typeof p !== 'string' || !isInsideRoot(p)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  if (!newName || typeof newName !== 'string') {
+    return res.status(400).json({ error: 'newName is required' });
+  }
+
+  const resolved = path.resolve(p);
+  const dir = path.dirname(resolved);
+  const ext = path.extname(resolved);
+
+  // The extension is always preserved from the original file (renaming
+  // shouldn't be able to change a photo's file type), so only the base
+  // name portion of newName is used, with any path separators stripped.
+  const baseOnly = path.basename(newName.trim());
+  const providedExt = path.extname(baseOnly);
+  const newBase = providedExt.toLowerCase() === ext.toLowerCase() && providedExt !== ''
+    ? baseOnly.slice(0, -providedExt.length)
+    : baseOnly;
+
+  // Reject characters that are illegal on FAT32/exFAT, the filesystems
+  // SD cards are normally formatted with.
+  if (!newBase || /[<>:"/\\|?*\x00-\x1f]/.test(newBase)) {
+    return res.status(400).json({ error: 'Invalid file name' });
+  }
+
+  const finalName = `${newBase}${ext}`;
+  const targetPath = path.join(dir, finalName);
+  if (!isInsideRoot(targetPath)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  if (targetPath === resolved) {
+    return res.json({ ok: true, path: resolved, name: path.basename(resolved) });
+  }
+  if (fssync.existsSync(targetPath)) {
+    return res.status(409).json({ error: 'A file with that name already exists' });
+  }
+
+  try {
+    const stat = await fs.stat(resolved);
+    const thm = await findCompanionThumb(resolved);
+    await fs.rename(resolved, targetPath);
+    await removeThumbCache(resolved, stat.mtimeMs);
+    if (thm) {
+      const thmTarget = path.join(dir, `${newBase}${path.extname(thm)}`);
+      if (!fssync.existsSync(thmTarget)) {
+        await fs.rename(thm, thmTarget);
+      }
+    }
+    res.json({ ok: true, path: targetPath, name: finalName });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 app.post('/api/save-edit', express.raw({ type: 'image/jpeg', limit: '50mb' }), async (req, res) => {
   const p = req.query.path;
   const mode = req.query.mode;
