@@ -4,9 +4,11 @@
     <requires>
       <tool name="node"/>
       <tool name="npm"/>
+      <tool name="lsof"/>
     </requires>
     <commands>
       <command name="sd-photo-viewer" build="npm install" output="bin/sd-photo-viewer"/>
+      <command name="sd-photo-viewer-stop" language="shell" source="bin/sd-photo-viewer-stop"/>
     </commands>
   </package>
 </tlib>

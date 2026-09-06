@@ -20,26 +20,55 @@ A local web app for browsing, culling, and lightly editing photos straight off a
 
 - [Node.js](https://nodejs.org/) 18+
 
-## Setup
+## Install
 
-### Option 1: manual
-
-Run this from inside the cloned repo (not your home directory — `npm start` needs the `package.json` here):
+### With tlib
 
 ```bash
-npm install
-npm start
+tlib install knittingCat/SD-Photo-Viewer
 ```
 
-### Option 2: via tlib
+This installs both `sd-photo-viewer` and `sd-photo-viewer-stop` as commands. See [BlueGrayFoo/TLIB](https://github.com/BlueGrayFoo/TLIB) for `tlib` itself.
 
-If you installed this with `tlib`, it's already set up — just run:
+### Without tlib
+
+```bash
+git clone git@github.com:knittingCat/SD-Photo-Viewer.git
+cd SD-Photo-Viewer
+npm install
+```
+
+## Run
+
+With tlib:
 
 ```bash
 sd-photo-viewer
 ```
 
+Without tlib, from inside the cloned repo (not your home directory — it needs the `package.json` here):
+
+```bash
+npm start
+```
+
 Either way, then open [http://localhost:4173](http://localhost:4173) and load a folder (e.g. your SD card's mount point, or paste its path directly).
+
+## Stop
+
+With tlib:
+
+```bash
+sd-photo-viewer-stop
+```
+
+Without tlib, from inside the cloned repo:
+
+```bash
+npm stop
+```
+
+Or just `Ctrl+C` in the terminal it's running in.
 
 ## Safety
 
