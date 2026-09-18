@@ -54,6 +54,8 @@ npm start
 
 Either way, then open [http://localhost:4173](http://localhost:4173) and load a folder (e.g. your SD card's mount point, or paste its path directly).
 
+The server binds to `127.0.0.1:4173`. If that port is busy it takes the next free one (up to 4193) and prints the URL it chose; you can also pick one with `sd-photo-viewer --port 8080` or `PORT=8080 npm start`. `sd-photo-viewer-stop` stops only this app's server, never whatever else might be on the port.
+
 ## Stop
 
 With tlib:
