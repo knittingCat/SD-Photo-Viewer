@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "stop": "bash bin/sd-photo-viewer-stop"
+    "stop": "bash bin/sd-photo-viewer-stop",
+    "receive": "node receiver.js"
   },
   "dependencies": {
     "express": "^4.19.2",
