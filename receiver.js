@@ -78,7 +78,14 @@ const ACTIONS = {
       in: [],
       out: {
         Source: '',
-        Sink: 'http-get:*:image/jpeg:*,http-get:*:image/png:*,http-get:*:image/gif:*'
+        Sink: [
+          'http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_SM',
+          'http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_MED',
+          'http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_LRG',
+          'http-get:*:image/jpeg:*',
+          'http-get:*:image/png:*',
+          'http-get:*:image/gif:*'
+        ].join(',')
       }
     },
     GetCurrentConnectionIDs: { in: [], out: { ConnectionIDs: '0' } },
@@ -111,9 +118,11 @@ function deviceXml() {
         <eventSubURL>/evt/${name}</eventSubURL>
       </service>`).join('');
   return `<?xml version="1.0"?>
-<root xmlns="urn:schemas-upnp-org:device-1-0">
+<root xmlns="urn:schemas-upnp-org:device-1-0" xmlns:dlna="urn:schemas-dlna-org:device-1-0">
   <specVersion><major>1</major><minor>0</minor></specVersion>
   <device>
+    <dlna:X_DLNADOC>DMR-1.50</dlna:X_DLNADOC>
+    <dlna:X_DLNADOC>M-DMR-1.50</dlna:X_DLNADOC>
     <deviceType>${DEVICE_TYPE}</deviceType>
     <friendlyName>${esc(FRIENDLY_NAME)}</friendlyName>
     <manufacturer>sd-photo-viewer</manufacturer>
