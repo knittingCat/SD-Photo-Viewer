@@ -12,18 +12,6 @@ A local web app for browsing, culling, and lightly editing photos straight off a
 - **Edit** — rotate, crop (free, original, or fixed ratios like 1:1 / 4:3 / 3:2 / 16:9, or custom), and adjust brightness/contrast.
 - **Save** — save edits as a new copy (original untouched) or overwrite the original.
 
-## Wi-Fi receiver (experimental)
-
-For cameras with a "View on TV" (DLNA) mode, such as the Sony RX100 II:
-
-```bash
-npm run receive
-```
-
-This makes the Mac appear to the camera as a DLNA media renderer. On the camera, join the same Wi-Fi network as the Mac (Menu > Wireless > Access Point Settings), then use Menu > Wireless > View on TV and pick the Mac. Photos the camera shows are downloaded to `~/Pictures/RX100/YYYY-MM-DD/`. Allow incoming connections if macOS asks.
-
-Everything the camera sends is logged, because how much of the original each camera model exposes (full size or a TV-sized preview) isn't documented. Check the saved file sizes before relying on it. Tested only against a simulated camera, not real hardware.
-
 ## Supported formats
 
 - Photos: `.jpg .jpeg .png .gif .webp .heic .heif .bmp .tif .tiff`
