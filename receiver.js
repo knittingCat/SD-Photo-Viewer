@@ -210,8 +210,23 @@ function download(url) {
 
 async function fetchPhoto(url) {
   try {
-    log('  downloading', url);
-    const { buffer, type } = await download(url);
+    // The camera's URL carries a DLNA profile query (JPEG_LRG = TV-sized copy).
+    // While its server is up, also try the bare path, which may be the
+    // original, and keep whichever file is larger.
+    const bare = url.split('?')[0];
+    let best = null;
+    for (const candidate of bare === url ? [url] : [bare, url]) {
+      log('  downloading', candidate);
+      try {
+        const got = await download(candidate);
+        log(`  got ${got.buffer.length} bytes (${got.type || 'unknown type'})`);
+        if (!best || got.buffer.length > best.buffer.length) best = got;
+      } catch (err) {
+        log('  failed:', String(err));
+      }
+    }
+    if (!best) throw new Error('no copy could be downloaded');
+    const { buffer, type } = best;
     const hash = crypto.createHash('sha1').update(buffer).digest('hex');
     if (seenHashes.has(hash)) {
       log('  already received this photo, skipping');
