@@ -195,7 +195,7 @@ function bestUrlFromMetadata(currentUri, metadata) {
 
 function download(url) {
   return new Promise((resolve, reject) => {
-    http.get(url, (res) => {
+    const req = http.get(url, { timeout: 8000 }, (res) => {
       if (res.statusCode !== 200) {
         res.resume();
         return reject(new Error(`HTTP ${res.statusCode}`));
@@ -204,7 +204,9 @@ function download(url) {
       res.on('data', (c) => chunks.push(c));
       res.on('end', () => resolve({ buffer: Buffer.concat(chunks), type: res.headers['content-type'] || '' }));
       res.on('error', reject);
-    }).on('error', reject);
+    });
+    req.on('timeout', () => req.destroy(new Error('timed out')));
+    req.on('error', reject);
   });
 }
 
@@ -215,7 +217,7 @@ async function fetchPhoto(url) {
     // original, and keep whichever file is larger.
     const bare = url.split('?')[0];
     let best = null;
-    for (const candidate of bare === url ? [url] : [bare, url]) {
+    for (const candidate of bare === url ? [url] : [url, bare]) {
       log('  downloading', candidate);
       try {
         const got = await download(candidate);
