@@ -162,6 +162,7 @@ function soapFault(code, description) {
 
 const EXT_BY_TYPE = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif' };
 const seenHashes = new Set();
+let receivedCount = 0;
 
 function bestUrlFromMetadata(currentUri, metadata) {
   // The camera's DIDL metadata may list several <res> entries (different
@@ -220,6 +221,7 @@ async function fetchPhoto(url) {
       target = path.join(dayDir, `${base}_${n}${ext}`);
     }
     await fs.writeFile(target, buffer);
+    receivedCount++;
     log(`  saved ${target} (${buffer.length} bytes, ${type || 'unknown type'})`);
   } catch (err) {
     log('  download failed:', String(err));
@@ -236,6 +238,16 @@ const server = http.createServer((req, res) => {
     log(`${req.method} ${req.url} from ${req.socket.remoteAddress}`);
     if (body) log('  body:', body.length > 2000 ? `${body.slice(0, 2000)}...` : body);
 
+    if (req.method === 'GET' && req.url === '/') {
+      return res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }).end(
+        `<!doctype html><meta charset="utf-8"><title>Photo Receiver</title>` +
+        `<body style="font:16px system-ui;max-width:36rem;margin:3rem auto;padding:0 1rem">` +
+        `<h1>${esc(FRIENDLY_NAME)}</h1>` +
+        `<p>Running. On the camera, use Menu &gt; Wireless &gt; View on TV and pick this Mac.</p>` +
+        `<p>Photos received so far this session: <b>${receivedCount}</b><br>Saved to: <code>${esc(IMPORT_DIR)}</code></p>` +
+        `<p>To browse them, run <code>sd-photo-viewer</code>, open <a href="http://localhost:4173">localhost:4173</a> and load that folder.</p>`
+      );
+    }
     if (req.method === 'GET' && req.url === '/desc.xml') {
       return res.writeHead(200, { 'Content-Type': 'text/xml; charset="utf-8"' }).end(deviceXml());
     }
