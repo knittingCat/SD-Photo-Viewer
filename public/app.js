@@ -1,6 +1,7 @@
 const dirInput = document.getElementById('dirInput');
 const loadBtn = document.getElementById('loadBtn');
-const volumeSuggestions = document.getElementById('volumeSuggestions');
+const importBtn = document.getElementById('importBtn');
+const volumeSuggestions =document.getElementById('volumeSuggestions');
 const toolbar = document.getElementById('toolbar');
 const countLabel = document.getElementById('countLabel');
 const selectAllBtn = document.getElementById('selectAllBtn');
@@ -91,6 +92,37 @@ async function loadPhotos() {
   } finally {
     loadBtn.disabled = false;
     loadBtn.textContent = 'Load';
+  }
+}
+
+async function importPhotos() {
+  const source = dirInput.value.trim();
+  if (!source) {
+    showToast('Enter or pick a card under /Volumes first');
+    return;
+  }
+  importBtn.disabled = true;
+  importBtn.textContent = 'Importing...';
+  try {
+    const res = await fetch('/api/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast(data.error || 'Import failed');
+      return;
+    }
+    const failedNote = data.failed.length ? `, ${data.failed.length} failed` : '';
+    showToast(`Imported ${data.imported}, skipped ${data.skipped} already imported${failedNote}`);
+    dirInput.value = data.destination;
+    await loadPhotos();
+  } catch (err) {
+    showToast('Error contacting server: ' + err);
+  } finally {
+    importBtn.disabled = false;
+    importBtn.textContent = 'Import new photos';
   }
 }
 
@@ -316,6 +348,7 @@ function renderCompare() {
 }
 
 loadBtn.addEventListener('click', loadPhotos);
+importBtn.addEventListener('click', importPhotos);
 dirInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') loadPhotos();
 });

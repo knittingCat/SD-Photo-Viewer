@@ -162,6 +162,82 @@ app.get('/api/photos', async (req, res) => {
   res.json({ root: resolved, photos: results });
 });
 
+// Import: copy new photos from a mounted camera/SD card (anything under
+// /Volumes) into a dated folder on this machine. A manifest of what was
+// already copied lets the same card be plugged in repeatedly without
+// duplicating photos, even after the originals are deleted from the card.
+const VOLUMES_DIR = process.env.SDPV_VOLUMES_DIR || '/Volumes';
+const IMPORT_DIR = process.env.SDPV_IMPORT_DIR || path.join(os.homedir(), 'Pictures', 'RX100');
+const MANIFEST_PATH = path.join(IMPORT_DIR, '.imported.json');
+
+function importKey(file) {
+  return `${file.name.toLowerCase()}|${file.size}|${Math.round(file.mtime / 1000)}`;
+}
+
+function localDateString(ms) {
+  const d = new Date(ms);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+async function readManifest() {
+  try {
+    return new Set(JSON.parse(await fs.readFile(MANIFEST_PATH, 'utf8')));
+  } catch {
+    return new Set();
+  }
+}
+
+app.post('/api/import', async (req, res) => {
+  const { source } = req.body || {};
+  if (!source || typeof source !== 'string') {
+    return res.status(400).json({ error: 'source is required' });
+  }
+  const resolved = path.resolve(source);
+  if (!resolved.startsWith(VOLUMES_DIR + path.sep) || !fssync.existsSync(resolved) || !fssync.statSync(resolved).isDirectory()) {
+    return res.status(400).json({ error: `Import source must be a mounted volume under ${VOLUMES_DIR}` });
+  }
+
+  const found = [];
+  await walk(resolved, found);
+  const done = await readManifest();
+  let imported = 0;
+  let skipped = 0;
+  const failed = [];
+
+  try {
+    await fs.mkdir(IMPORT_DIR, { recursive: true });
+    for (const file of found) {
+      const key = importKey(file);
+      if (done.has(key)) {
+        skipped++;
+        continue;
+      }
+      const dayDir = path.join(IMPORT_DIR, localDateString(file.mtime));
+      await fs.mkdir(dayDir, { recursive: true });
+      // Different cards reuse names like DSC00001.JPG, so never overwrite.
+      const ext = path.extname(file.name);
+      const base = path.basename(file.name, ext);
+      let target = path.join(dayDir, file.name);
+      for (let n = 1; fssync.existsSync(target); n++) {
+        target = path.join(dayDir, `${base}_${n}${ext}`);
+      }
+      try {
+        await fs.copyFile(file.path, target, fssync.constants.COPYFILE_EXCL);
+        await fs.utimes(target, new Date(), new Date(file.mtime));
+        done.add(key);
+        imported++;
+      } catch (err) {
+        failed.push({ name: file.name, error: String(err) });
+      }
+    }
+    await fs.writeFile(MANIFEST_PATH, JSON.stringify([...done]));
+    res.json({ ok: true, imported, skipped, failed, destination: IMPORT_DIR });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 app.get('/api/image', (req, res) => {
   const p = req.query.path;
   if (!p || typeof p !== 'string' || !isInsideRoot(p)) {

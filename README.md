@@ -6,6 +6,7 @@ A local web app for browsing, culling, and lightly editing photos straight off a
 
 - **Browse** — point it at a mounted SD card (auto-suggested from `/Volumes`) or any folder; it recursively finds photos and RAW files, sorted by date taken.
 - **Thumbnails** — fast grid view with cached, generated thumbnails.
+- **Import** — pick a card (or a camera in USB Mass Storage mode, e.g. a Sony RX100 II) and click "Import new photos". New photos are copied to `~/Pictures/RX100/YYYY-MM-DD/` (override with `SDPV_IMPORT_DIR`), and the folder then opens for culling. Photos already imported are skipped on later runs, even if you deleted them from the card.
 - **Compare** — select multiple photos and view them side by side to pick the keeper.
 - **Trash** — move unwanted photos to the system Trash (not permanently deleted), including their camera-generated `.THM` sidecar files.
 - **Edit** — rotate, crop (free, original, or fixed ratios like 1:1 / 4:3 / 3:2 / 16:9, or custom), and adjust brightness/contrast.
